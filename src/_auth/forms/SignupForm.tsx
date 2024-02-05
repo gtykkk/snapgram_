@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useToast } from '@/components/ui/use-toast'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
@@ -8,12 +8,19 @@ import { useForm } from 'react-hook-form'
 import { SignupValidation } from '@/lib/validation'
 import { z } from "zod"
 import Loader from '@/components/shared/Loader'
-import { createUserAccount } from '@/lib/appwrite/api'
+import { useCreateUserAccount, useSignInAccount } from "@/lib/react-query/queriesAndMutations"
+import { useUserContext } from "@/context/AuthContext"
 
 
 const SignupForm = () => {
   const { toast } = useToast();
-  const isLoading = false;
+  const { checkAuthUser, isLoading: isUserLoading } = useUserContext();
+  const navigate = useNavigate();
+
+  const { mutateAsync: createUserAccount, isPending: isCreatingAccount } = useCreateUserAccount();
+
+  const { mutateAsync: signInAccount, isPending: isSigningIn } = useSignInAccount();
+
   // 1. Define your form.
   const form = useForm<z.infer<typeof SignupValidation>>({
     resolver: zodResolver(SignupValidation),
@@ -25,7 +32,7 @@ const SignupForm = () => {
     },
   })
 
-  // 2. Define a submit handler.
+  // 2. submit 버튼 눌렀을 때.
   async function onSubmit(values: z.infer<typeof SignupValidation>) {
     // 사용자 만들기
     const newUser = await createUserAccount(values)
@@ -34,7 +41,23 @@ const SignupForm = () => {
       return toast({ title: '회원가입이 실패하였습니다. 다시 시도하여 주세요.' })
     }
 
-    const session = await signInAccount
+    const session = await signInAccount({
+      email: values.email,
+      password: values.password
+    })
+
+    if(!session) {
+      return toast({ title: '로그인이 실패하였습니다. 다시 시도하여 주세요.' })
+    }
+
+    const isLoggedIn = await checkAuthUser();
+
+    if(isLoggedIn) {
+      form.reset();
+      navigate('/');
+    } else {
+      toast({ title: '로그인이 실패하였습니다. 다시 시도하여 주세요.'})
+    }
   }
   return (
     <Form {...form}>
@@ -96,7 +119,7 @@ const SignupForm = () => {
             )}
           />
           <Button type="submit" className='shad-button_primary'>
-            {isLoading ? (
+            {isCreatingAccount ? (
               <div className="flex-center gap-2">
                 <Loader />로딩중...
               </div>
