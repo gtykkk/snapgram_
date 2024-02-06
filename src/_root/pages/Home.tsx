@@ -1,3 +1,5 @@
+import RootLayout from "../RootLayout"
+
 const Home = () => {
     return (
         <div>
