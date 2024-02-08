@@ -15,9 +15,10 @@ import { useCreatePost } from "@/lib/react-query/queriesAndMutations"
 
 type PostFormProps = {
     post?: Models.Document;
+    action: 'Create' | 'Update'
 }
 
-const PostForm = ({ post }: PostFormProps) => {
+const PostForm = ({ post, action }: PostFormProps) => {
     const navigate = useNavigate();
     const { toast } = useToast();
     const { user } = useUserContext();
@@ -29,7 +30,7 @@ const PostForm = ({ post }: PostFormProps) => {
         defaultValues: {
             caption: post ? post?.caption : "",
             file: [],
-            location: post ? post?.loaction : "",
+            location: post ? post?.location : "",
             tags: post ? post.tags.join(',') : ""
         },
     })
