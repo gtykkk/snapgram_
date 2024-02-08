@@ -96,13 +96,13 @@ export async function createPost(post: INewPost) {
         // storage로 이미지 업로드하기
         const uploadedFile = await uploadFile(post.file[0]);
 
-        if(!uploadedFile) throw Error;
+        if (!uploadedFile) throw Error;
 
         // 파일 url 가져오기
         const fileUrl = getFilePreview(uploadedFile.$id);
 
-        if(!fileUrl) {
-            deleteFile(uploadedFile.$id);
+        if (!fileUrl) {
+            await deleteFile(uploadedFile.$id);
             throw Error;
         }
 
@@ -124,7 +124,9 @@ export async function createPost(post: INewPost) {
             }
         )
 
-        if(!newPost) {
+        console.log({ newPost });
+
+        if (!newPost) {
             await deleteFile(uploadedFile.$id);
             throw Error;
         }
@@ -149,7 +151,7 @@ export async function uploadFile(file: File) {
     }
 }
 
-export async function getFilePreview(fileId: string) {
+export function getFilePreview(fileId: string) {
     try {
         const fileUrl = storage.getFilePreview(
             appwriteConfig.storageId,
@@ -158,7 +160,9 @@ export async function getFilePreview(fileId: string) {
             2000,
             "top",
             100
-        )
+        );
+
+        if (!fileUrl) throw Error;
 
         return fileUrl;
     } catch (error) {
@@ -176,14 +180,20 @@ export async function deleteFile(fileId: string) {
     }
 }
 
+// 최근 날짜 순으로 정렬
 export async function getRecentPosts() {
-    const posts = await databases.listDocuments(
-        appwriteConfig.databaseId,
-        appwriteConfig.postCollectionId,
-        [Query.orderDesc('$createdAt'), Query.limit(20)]
-    )
+    try {
+        const posts = await databases.listDocuments(
+            appwriteConfig.databaseId,
+            appwriteConfig.postCollectionId,
+            [Query.orderDesc('$createdAt'), Query.limit(20)]
+        );
 
-    if(!posts) throw Error;
+        if (!posts) throw Error;
 
-    return posts;
+        return posts;
+    } catch (error) {
+        console.log(error);
+    }
+
 }

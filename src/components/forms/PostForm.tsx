@@ -18,11 +18,10 @@ type PostFormProps = {
 }
 
 const PostForm = ({ post }: PostFormProps) => {
-    const { mutateAsync: createPost, isPending: isLoadingCreate } = useCreatePost();
-    const { user } = useUserContext();
-    const { toast } = useToast();
     const navigate = useNavigate();
-
+    const { toast } = useToast();
+    const { user } = useUserContext();
+    
     // https://ui.shadcn.com/docs/components/form 따라서 만듦
     // 1. Define your form
     const form = useForm<z.infer<typeof PostValidation>>({
@@ -34,13 +33,15 @@ const PostForm = ({ post }: PostFormProps) => {
             tags: post ? post.tags.join(',') : ""
         },
     })
+    
+    const { mutateAsync: createPost, isPending: isLoadingCreate } = useCreatePost();
 
     // submit handler
     async function onSubmit(values: z.infer<typeof PostValidation>) {
         const newPost = await createPost({
             ...values,
-            userId: user.id
-        })
+            userId: user.id,
+        });
         
         if(!newPost) {
             toast({
@@ -50,6 +51,7 @@ const PostForm = ({ post }: PostFormProps) => {
 
         navigate('/')
     }
+
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-9 w-full max-w-5xl">
@@ -60,7 +62,10 @@ const PostForm = ({ post }: PostFormProps) => {
                         <FormItem>
                             <FormLabel className="shad-form_label">설명</FormLabel>
                             <FormControl>
-                                <Textarea className="shad-textarea custom-scrollbar" placeholder="..." {...field} />
+                                <Textarea
+                                    className="shad-textarea custom-scrollbar"
+                                    {...field} 
+                                />
                             </FormControl>
                             <FormMessage className="shad-form_message" />
                         </FormItem>
@@ -89,7 +94,11 @@ const PostForm = ({ post }: PostFormProps) => {
                         <FormItem>
                             <FormLabel className="shad-form_label">위치</FormLabel>
                             <FormControl>
-                                <Input type="text" className="shad-input" {...field} />
+                                <Input 
+                                    type="text"
+                                    className="shad-input"
+                                    {...field}
+                                />
                             </FormControl>
                             <FormMessage className="shad-form_message" />
                         </FormItem>
@@ -107,7 +116,7 @@ const PostForm = ({ post }: PostFormProps) => {
                                 <Input
                                     type="text"
                                     className="shad-input"
-                                    placeholder="JS, React, NextJS"
+                                    placeholder="ex) JS, React, NextJS"
                                     {...field}
                                 />
                             </FormControl>
@@ -118,10 +127,14 @@ const PostForm = ({ post }: PostFormProps) => {
                 <div className="flex gap-4 items-center justify-end">
                     <Button
                         type="button"
-                        className="shad-button_dark_4">Cancel</Button>
+                        className="shad-button_dark_4">
+                        취소
+                    </Button>
                     <Button
                         type="submit"
-                        className="shad-button_primary whitespace-nowrap">Submit</Button>
+                        className="shad-button_primary whitespace-nowrap">
+                        확인
+                    </Button>
                 </div>
             </form>
         </Form>

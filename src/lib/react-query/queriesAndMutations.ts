@@ -39,7 +39,7 @@ export const useCreatePost = () => {
             });
         },
     });
-};
+}
 
 export const useGetRecentPosts = () => {
     return useQuery({
