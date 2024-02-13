@@ -63,7 +63,7 @@ export async function signInAccount(user: { email: string; password: string }) {
 
 export async function getCurrentUser() {
     try {
-        const currentAccount = await account.get()
+        const currentAccount = await account.get();
 
         if (!currentAccount) throw Error;
 
@@ -77,7 +77,7 @@ export async function getCurrentUser() {
 
         return currentUser.documents[0]
     } catch (error) {
-        console.log(error)
+        console.log(error);
     }
 }
 

@@ -13,7 +13,7 @@ const CreatePost = () => {
           />
           <h2 className="h3-bold md:h2-bold text-left w-full">게시물 작성</h2>
         </div>
-        <PostForm />
+        <PostForm action='생성'/>
       </div>
     </div>
   )

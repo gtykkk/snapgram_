@@ -22,7 +22,7 @@ const EditPost = () => {
           <h2 className="h3-bold md:h2-bold text-left w-full">게시물 수정</h2>
         </div>
         <PostForm
-          action="Update"
+          action="수정"
           post={post}
         />
       </div>

@@ -11,11 +11,11 @@ import { PostValidation } from "@/lib/validation"
 import { Models } from "appwrite"
 import { useUserContext } from "@/context/AuthContext"
 import { useToast } from "../ui/use-toast"
-import { useCreatePost } from "@/lib/react-query/queriesAndMutations"
+import { useCreatePost, useUpdatePost } from "@/lib/react-query/queriesAndMutations"
 
 type PostFormProps = {
     post?: Models.Document;
-    action: 'Create' | 'Update'
+    action: '생성' | '수정'
 }
 
 const PostForm = ({ post, action }: PostFormProps) => {
@@ -36,9 +36,27 @@ const PostForm = ({ post, action }: PostFormProps) => {
     })
     
     const { mutateAsync: createPost, isPending: isLoadingCreate } = useCreatePost();
+    const { mutateAsync: updatePost, isPending: isLoadingUpdate } = useUpdatePost();
 
     // submit handler
     async function onSubmit(values: z.infer<typeof PostValidation>) {
+        if(post && action === '수정') {
+            const updatedPost = await updatePost({
+                ...values,
+                postId: post.$id,
+                imageId: post?.imageId,
+                imageUrl: post?.imageUrl,
+            });
+
+            if(!updatedPost) {
+                toast({
+                    title: '다시 시도하여 주세요.'
+                });
+            }
+
+            return navigate(`/posts/${post.$id}`)
+        }
+
         const newPost = await createPost({
             ...values,
             userId: user.id,
@@ -133,8 +151,11 @@ const PostForm = ({ post, action }: PostFormProps) => {
                     </Button>
                     <Button
                         type="submit"
-                        className="shad-button_primary whitespace-nowrap">
-                        확인
+                        className="shad-button_primary whitespace-nowrap"
+                        disabled={isLoadingCreate || isLoadingUpdate}
+                    >
+                        {isLoadingCreate || isLoadingUpdate && '로딩중...'}
+                        게시글 {action}
                     </Button>
                 </div>
             </form>
