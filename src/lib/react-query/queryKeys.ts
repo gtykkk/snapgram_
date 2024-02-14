@@ -7,7 +7,7 @@ export enum QUERY_KEYS {
     GET_USERS = 'getUsers',
     GET_USER_BY_ID = 'getUserById',
 
-    // 게시물키
+    // 게시글키
     GET_POSTS = 'getPosts',
     GET_INFINITE_POSTS = 'getInfinitePosts',
     GET_RECENT_POSTS = 'getRecentPosts',

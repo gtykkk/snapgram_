@@ -109,7 +109,7 @@ export async function createPost(post: INewPost) {
         // 태그를 배열에 넣기
         const tags = post.tags?.replace(/ /g, "").split(",") || [];
 
-        // 게시물을 저장하기
+        // 게시글을 저장하기
         const newPost = await databases.createDocument(
             appwriteConfig.databaseId,
             appwriteConfig.postCollectionId,
@@ -168,6 +168,7 @@ export function getFilePreview(fileId: string) {
     }
 }
 
+// 파일 삭제
 export async function deleteFile(fileId: string) {
     try {
         await storage.deleteFile(appwriteConfig.storageId, fileId);
@@ -215,7 +216,7 @@ export async function likePost(postId: string, likesArray: string[]) {
     }
 }
 
-// 저장된 게시물
+// 저장된 게시글
 export async function savePost(postId: string, userId: string) {
     try {
         const updatedPost = await databases.createDocument(
@@ -236,7 +237,7 @@ export async function savePost(postId: string, userId: string) {
     }
 }
 
-// 저장된 게시물 삭제
+// 저장된 게시글 삭제
 export async function deleteSavedPost(savedRecordId: string) {
     try {
         const statusCode = await databases.deleteDocument(
@@ -253,7 +254,7 @@ export async function deleteSavedPost(savedRecordId: string) {
     }
 }
 
-// 게시물 아이디 불러오기
+// 게시글 아이디 불러오기
 export async function getPostById(postId: string) {
     try {
         const post = await databases.getDocument(
@@ -268,7 +269,7 @@ export async function getPostById(postId: string) {
     }
 }
 
-// 게시물 수정
+// 게시글 수정
 export async function updatePost(post: IUpdatePost) {
     const hasFileToUpdate = post.file.length > 0;
 
@@ -298,7 +299,7 @@ export async function updatePost(post: IUpdatePost) {
         // 태그를 배열에 넣기
         const tags = post.tags?.replace(/ /g, "").split(",") || [];
 
-        // 게시물을 저장하기
+        // 게시글을 저장하기
         const updatedPost = await databases.updateDocument(
             appwriteConfig.databaseId,
             appwriteConfig.postCollectionId,
@@ -323,7 +324,7 @@ export async function updatePost(post: IUpdatePost) {
     }
 }
 
-// 게시물 삭제
+// 게시글 삭제
 export async function deletePost(postId: string, imageId: string) {
     if(!postId || !imageId) throw Error;
 
@@ -335,6 +336,46 @@ export async function deletePost(postId: string, imageId: string) {
         )
 
         return { status : 'ok' }
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+// (탐색) 인기있는 게시글 10개 가져오기
+export async function getInfinitePosts({ pageParam }: { pageParam: number}) {
+    const queries: any[] = [Query.orderDesc('$updatedAt'), Query.limit(10)];
+
+    if(pageParam) {
+        queries.push(Query.cursorAfter(pageParam.toString()));
+    }
+
+    try {
+        const posts = await databases.listDocuments(
+            appwriteConfig.databaseId,
+            appwriteConfig.postCollectionId,
+            queries
+        )
+
+        if(!posts) throw Error;
+
+        return posts;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+// (탐색) 게시글 검색
+export async function searchPosts(searchTerm: string) {
+    try {
+        const posts = await databases.listDocuments(
+            appwriteConfig.databaseId,
+            appwriteConfig.postCollectionId,
+            [Query.search('caption', searchTerm)]
+        )
+
+        if(!posts) throw Error;
+
+        return posts;
     } catch (error) {
         console.log(error);
     }
